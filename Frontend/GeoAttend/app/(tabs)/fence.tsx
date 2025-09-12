@@ -321,6 +321,7 @@ export default function GeofenceScreen() {
       </View>
 
       <MapView
+      provider='google'
         style={styles.map}
         initialRegion={{
           latitude: fenceCenter.latitude,
@@ -370,7 +371,7 @@ export default function GeofenceScreen() {
         />
       </MapView>
 
-      <View style={styles.instructionContainer}>
+      {/* <View style={styles.instructionContainer}>
         <Text style={styles.instructionText}>
           {isSettingFence 
             ? "🎯 Tap anywhere on the map to set fence center" 
@@ -383,7 +384,7 @@ export default function GeofenceScreen() {
         <Text style={styles.instructionText}>
           📳 Alerts use vibration + visual feedback (works in Expo Go)
         </Text>
-      </View>
+      </View> */}
     </SafeAreaView>
   );
 }
