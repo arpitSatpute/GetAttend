@@ -1,25 +1,52 @@
 import { Image } from 'expo-image';
-import { Platform, ScrollView, StyleSheet, TouchableOpacity , Text} from 'react-native';
+import { Platform, ScrollView, StyleSheet, TouchableOpacity , Text, View, Alert} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ParallaxScrollView from '@/components/parallax-scroll-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function HomeScreen() {
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { 
+          text: 'Logout', 
+          style: 'destructive',
+          onPress: () => {
+            logout();
+            router.replace('/welcome' as any);
+          }
+        }
+      ]
+    );
+  };
+
   return (
     
     <SafeAreaView>
       <ScrollView>
       <ThemedView style={styles.heroContainer}>
-        <ThemedView style={styles.headerContainer}>
-          <Ionicons name="location" size={80} color="white" />
-          <ThemedText style={styles.headerTitle}>GeoAttend</ThemedText>
-        </ThemedView>
-      
-      </ThemedView>
+      <ThemedView style={styles.headerContainer}>
+        <View style={styles.headerTop}>
+          <View style={styles.headerLeft}>
+            <Ionicons name="location" size={60} color="#4285F4" />
+            <ThemedText style={styles.headerTitle}>GeoAttend</ThemedText>
+          </View>
+          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+            <Ionicons name="log-out-outline" size={24} color="#4285F4" />
+          </TouchableOpacity>
+        </View>
+       
+      </ThemedView>      </ThemedView>
       
       {/* Hero Section */}
       <ThemedView style={styles.heroContainer}>
@@ -146,11 +173,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: 'white',
-    marginTop: 20,
-    paddingTop: 10,
+    color: '#4285F4',
+    marginLeft: 12,
+    marginTop: 8,
   },
   heroContainer: {
     alignItems: 'center',
@@ -256,5 +283,27 @@ const styles = StyleSheet.create({
   stepDescription: {
     marginTop: 4,
     opacity: 0.7,
+  },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  logoutButton: {
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#f0f0f0',
+  },
+  welcomeText: {
+    fontSize: 16,
+    color: '#666',
+    marginTop: 8,
+    textAlign: 'center',
   },
 });

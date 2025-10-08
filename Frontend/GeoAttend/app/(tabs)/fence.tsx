@@ -27,18 +27,13 @@ export default function GeofenceScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSettingFence, setIsSettingFence] = useState<boolean>(false);
   const [fenceRadius, setFenceRadius] = useState<number>(200); // Default 200m
-  const [alertHistory, setAlertHistory] = useState<Array<{
-    time: string;
-    status: string;
-    distance: number;
-  }>>([]);
 
   // Get current location on component mount
   useEffect(() => {
     getCurrentLocation();
   }, []);
 
-  // Send alert (using vibration and visual feedback instead of push notifications)
+  // Send alert (using vibration and popup alert)
   const sendAlert = (title: string, body: string, isInside: boolean) => {
     // Vibration pattern for alerts
     const vibrationPattern = isInside 
@@ -47,20 +42,15 @@ export default function GeofenceScreen() {
 
     Vibration.vibrate(vibrationPattern);
 
-    // Add to alert history
-    const newAlert = {
-      time: new Date().toLocaleTimeString(),
-      status: isInside ? 'ENTERED' : 'EXITED',
-      distance: Math.round(calculateDistance(fenceCenter, pointerLocation))
-    };
-
-    setAlertHistory(prev => [newAlert, ...prev.slice(0, 4)]); // Keep last 5 alerts
-
-    // Show visual alert
+    // Show popup alert
     Alert.alert(
       title,
       body,
-      [{ text: 'OK', style: isInside ? 'default' : 'destructive' }]
+      [{ 
+        text: 'OK', 
+        style: isInside ? 'default' : 'destructive',
+        onPress: () => console.log('Alert acknowledged')
+      }]
     );
   };
 
@@ -207,12 +197,6 @@ export default function GeofenceScreen() {
     );
   };
 
-  // Clear alert history
-  const clearAlertHistory = () => {
-    setAlertHistory([]);
-    Alert.alert('Cleared!', 'Alert history has been cleared.');
-  };
-
   const currentDistance = calculateDistance(fenceCenter, pointerLocation);
 
   if (isLoading) {
@@ -235,36 +219,10 @@ export default function GeofenceScreen() {
           Distance: {Math.round(currentDistance)}m from center
         </Text>
         
-        {/* Alert Status */}
-        <Text style={styles.notificationStatus}>
-          📳 Alerts: Vibration + Visual (Expo Go Compatible)
-        </Text>
+       
         
-        {/* Control Buttons */}
-        <View style={styles.controlButtons}>
-          <TouchableOpacity 
-            style={[styles.controlButton, isSettingFence && styles.activeButton]} 
-            onPress={toggleFenceSettingMode}
-          >
-            <Text style={[styles.controlButtonText, isSettingFence && styles.activeButtonText]}>
-              {isSettingFence ? '📍 Tap Map to Set Fence' : '⚙️ Set Fence Location'}
-            </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.controlButton} 
-            onPress={setFenceToCurrentLocation}
-          >
-            <Text style={styles.controlButtonText}>📍 Use Current Location</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.testButton} 
-            onPress={testAlert}
-          >
-            <Text style={styles.controlButtonText}>🧪 Test Alert</Text>
-          </TouchableOpacity>
-        </View>
+        {/* Test Button */}
+        
 
         {/* Radius Controls */}
         <View style={styles.radiusControls}>
@@ -296,28 +254,7 @@ export default function GeofenceScreen() {
           </View>
         </View>
 
-        {/* Alert History */}
-        {alertHistory.length > 0 && (
-          <View style={styles.alertHistory}>
-            <View style={styles.alertHistoryHeader}>
-              <Text style={styles.alertHistoryTitle}>Recent Alerts</Text>
-              <TouchableOpacity onPress={clearAlertHistory}>
-                <Text style={styles.clearButton}>Clear</Text>
-              </TouchableOpacity>
-            </View>
-            {alertHistory.map((alert, index) => (
-              <View key={index} style={styles.alertItem}>
-                <Text style={[styles.alertStatus, { 
-                  color: alert.status === 'ENTERED' ? '#4CAF50' : '#F44336' 
-                }]}>
-                  {alert.status === 'ENTERED' ? '✅' : '🚫'} {alert.status}
-                </Text>
-                <Text style={styles.alertTime}>{alert.time}</Text>
-                <Text style={styles.alertDistance}>{alert.distance}m</Text>
-              </View>
-            ))}
-          </View>
-        )}
+
       </View>
 
       <MapView
@@ -371,20 +308,24 @@ export default function GeofenceScreen() {
         />
       </MapView>
 
-      {/* <View style={styles.instructionContainer}>
-        <Text style={styles.instructionText}>
-          {isSettingFence 
-            ? "🎯 Tap anywhere on the map to set fence center" 
-            : "📍 Drag markers or tap map to test geofencing"
-          }
-        </Text>
-        <Text style={styles.instructionText}>
-          🔵 Blue marker = Fence center | 🔴/🟢 Red/Green marker = Test pointer
-        </Text>
-        <Text style={styles.instructionText}>
-          📳 Alerts use vibration + visual feedback (works in Expo Go)
-        </Text>
-      </View> */}
+      {/* Bottom Button Row */}
+      <View style={styles.bottomButtonContainer}>
+        <TouchableOpacity 
+          style={[styles.bottomButton, styles.setFenceButton, isSettingFence && styles.activeBottomButton]} 
+          onPress={toggleFenceSettingMode}
+        >
+          <Text style={[styles.bottomButtonText, isSettingFence && styles.activeBottomButtonText]}>
+            {isSettingFence ? '📍 Tap Map to Set' : '⚙️ Set Fence'}
+          </Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={[styles.bottomButton, styles.currentLocationButton]} 
+          onPress={setFenceToCurrentLocation}
+        >
+          <Text style={styles.bottomButtonText}>� Use Current Location</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -479,52 +420,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
   },
-  alertHistory: {
-    backgroundColor: 'white',
-    borderRadius: 8,
-    padding: 12,
-    marginTop: 8,
-  },
-  alertHistoryHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  alertHistoryTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  clearButton: {
-    fontSize: 12,
-    color: '#FF5722',
-    textDecorationLine: 'underline',
-  },
-  alertItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  alertStatus: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    flex: 1,
-  },
-  alertTime: {
-    fontSize: 10,
-    color: '#666',
-    flex: 1,
-    textAlign: 'center',
-  },
-  alertDistance: {
-    fontSize: 10,
-    color: '#666',
-    textAlign: 'right',
-  },
+
   map: {
     flex: 1,
   },
@@ -539,5 +435,47 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
     marginBottom: 4,
+  },
+  bottomButtonContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 20,
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#e0e0e0',
+    gap: 12,
+  },
+  bottomButton: {
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  setFenceButton: {
+    backgroundColor: '#4285F4',
+  },
+  currentLocationButton: {
+    backgroundColor: '#34A853',
+  },
+  activeBottomButton: {
+    backgroundColor: '#1976D2',
+  },
+  bottomButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
+    textAlign: 'center',
+  },
+  activeBottomButtonText: {
+    color: '#fff',
+    fontWeight: '700',
   },
 });
