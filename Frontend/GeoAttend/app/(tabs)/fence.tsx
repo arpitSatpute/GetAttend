@@ -219,10 +219,6 @@ export default function GeofenceScreen() {
           Distance: {Math.round(currentDistance)}m from center
         </Text>
         
-       
-        
-        {/* Test Button */}
-        
 
         {/* Radius Controls */}
         <View style={styles.radiusControls}>

@@ -5,7 +5,7 @@ import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Ionicons } from '@expo/vector-icons';  
+import { Ionicons } from '@expo/vector-icons';
 
 
 export default function TabLayout() {
@@ -26,9 +26,44 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="dashboard"
+        options={{
+          title: 'Dashboard',
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="analytics" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="attendance"
+        options={{
+          title: 'Attendance',
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="calendar" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="insights"
+        options={{
+          title: 'Insights',
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="bar-chart" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="reports"
+        options={{
+          title: 'Reports',
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="document" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="geofence-management"
+        options={{
+          title: 'Geofence',
+          tabBarIcon: ({ color }) => <Ionicons size={28} name="settings" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="fence"
         options={{
-          title: 'Fence',
+          title: 'Map',
           tabBarIcon: ({ color }) => <Ionicons size={28} name="location" color={color} />,
         }}
       />
