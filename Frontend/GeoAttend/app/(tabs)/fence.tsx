@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import MapView, { Circle, Marker } from 'react-native-maps';
-import { StyleSheet, View, Alert, Text, TouchableOpacity, Vibration } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import * as Location from 'expo-location';
+import React, { useEffect, useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, Vibration, View } from 'react-native';
+import MapView, { Circle, Marker } from 'react-native-maps';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 interface Coordinate {
   latitude: number;
@@ -27,11 +28,19 @@ export default function GeofenceScreen() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isSettingFence, setIsSettingFence] = useState<boolean>(false);
   const [fenceRadius, setFenceRadius] = useState<number>(200); // Default 200m
+  const [distance, setDistance] = useState<number>(0);
 
   // Get current location on component mount
   useEffect(() => {
     getCurrentLocation();
   }, []);
+
+  // Update distance when positions change
+  useEffect(() => {
+    const newDistance = calculateDistance(fenceCenter, pointerLocation);
+    setDistance(newDistance);
+    setIsInsideFence(newDistance <= fenceRadius);
+  }, [fenceCenter, pointerLocation, fenceRadius]);
 
   // Send alert (using vibration and popup alert)
   const sendAlert = (title: string, body: string, isInside: boolean) => {
@@ -203,6 +212,7 @@ export default function GeofenceScreen() {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
+          <Ionicons name="location" size={48} color="#1e88e5" style={{ marginBottom: 16 }} />
           <Text style={styles.loadingText}>Getting your current location...</Text>
         </View>
       </SafeAreaView>
@@ -212,17 +222,30 @@ export default function GeofenceScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.statusContainer}>
-        <Text style={[styles.statusText, { color: isInsideFence ? '#4CAF50' : '#F44336' }]}>
-          Status: {isInsideFence ? 'INSIDE' : 'OUTSIDE'} fence
-        </Text>
-        <Text style={styles.distanceText}>
-          Distance: {Math.round(currentDistance)}m from center
-        </Text>
-        
+        {/* Status Badge */}
+        <View style={[styles.statusBadge, isInsideFence ? styles.statusInsideBadge : styles.statusOutsideBadge]}>
+          <Ionicons 
+            name={isInsideFence ? 'checkmark-circle' : 'close-circle'} 
+            size={24} 
+            color={isInsideFence ? '#2e7d32' : '#c62828'}
+            style={styles.statusIcon}
+          />
+          <Text style={[styles.statusText, isInsideFence ? styles.statusInsideText : styles.statusOutsideText]}>
+            {isInsideFence ? 'INSIDE FENCE' : 'OUTSIDE FENCE'}
+          </Text>
+        </View>
+
+        {/* Distance Display */}
+        <View style={styles.distanceContainer}>
+          <Text style={styles.distanceLabel}>Distance from Center</Text>
+          <Text style={styles.distanceText}>{Math.round(currentDistance)}m</Text>
+          <Text style={styles.distanceSubtext}>Radius: {fenceRadius}m</Text>
+        </View>
 
         {/* Radius Controls */}
         <View style={styles.radiusControls}>
-          <Text style={styles.radiusLabel}>Fence Radius: {fenceRadius}m</Text>
+          <Text style={styles.radiusLabel}>Adjust Fence Radius</Text>
+          <Text style={styles.radiusValue}>{fenceRadius}m</Text>
           <View style={styles.radiusButtons}>
             <TouchableOpacity 
               style={styles.radiusButton} 
@@ -233,7 +256,7 @@ export default function GeofenceScreen() {
                 setIsInsideFence(distance <= newRadius);
               }}
             >
-              <Text style={styles.radiusButtonText}>-50m</Text>
+              <Text style={styles.radiusButtonText}>−50m</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 
@@ -342,28 +365,71 @@ const styles = StyleSheet.create({
   },
   statusContainer: {
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#ffffff',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: '#e0e0e0',
+  },
+  statusBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  statusInsideBadge: {
+    backgroundColor: '#e8f5e9',
+  },
+  statusOutsideBadge: {
+    backgroundColor: '#ffebee',
   },
   statusText: {
     fontSize: 18,
-    fontWeight: 'bold',
-    textAlign: 'center',
+    fontWeight: '700',
+    marginRight: 8,
+  },
+  statusInsideText: {
+    color: '#2e7d32',
+  },
+  statusOutsideText: {
+    color: '#c62828',
+  },
+  statusIcon: {
+    marginRight: 8,
+  },
+  distanceContainer: {
+    backgroundColor: '#f5f7fa',
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: 'center',
+  },
+  distanceLabel: {
+    fontSize: 12,
+    color: '#666666',
     marginBottom: 4,
+    fontWeight: '500',
   },
   distanceText: {
-    fontSize: 14,
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: 8,
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#1e88e5',
+    marginBottom: 4,
+  },
+  distanceSubtext: {
+    fontSize: 12,
+    color: '#999999',
   },
   notificationStatus: {
     fontSize: 12,
     textAlign: 'center',
     marginBottom: 12,
     fontWeight: '600',
-    color: '#4CAF50',
+    paddingVertical: 8,
+    backgroundColor: '#e8f5e9',
+    color: '#2e7d32',
+    borderRadius: 8,
   },
   controlButtons: {
     flexDirection: 'column',
@@ -371,49 +437,70 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   controlButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: '#1e88e5',
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 12,
     borderRadius: 8,
     alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    shadowColor: '#1e88e5',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
   },
   activeButton: {
-    backgroundColor: '#FF9800',
+    backgroundColor: '#fb8c00',
+    shadowColor: '#fb8c00',
   },
   testButton: {
-    backgroundColor: '#9C27B0',
+    backgroundColor: '#7b1fa2',
+    shadowColor: '#7b1fa2',
   },
   controlButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: '600',
   },
-  activeButtonText: {
-    color: 'white',
-  },
   radiusControls: {
     alignItems: 'center',
     marginBottom: 12,
+    backgroundColor: '#f5f7fa',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 12,
   },
   radiusLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
     marginBottom: 8,
-    color: '#333',
+    color: '#1a1a1a',
+  },
+  radiusValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#1e88e5',
+    marginBottom: 8,
   },
   radiusButtons: {
     flexDirection: 'row',
     gap: 8,
   },
   radiusButton: {
-    backgroundColor: '#2196F3',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 6,
+    backgroundColor: '#1e88e5',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    shadowColor: '#1e88e5',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 3,
   },
   radiusButtonText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
 
@@ -421,23 +508,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   instructionContainer: {
-    padding: 16,
-    backgroundColor: '#f9f9f9',
+    padding: 12,
+    backgroundColor: '#e3f2fd',
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
+    borderTopColor: '#bbdefb',
   },
   instructionText: {
     fontSize: 12,
-    color: '#666',
+    color: '#1565c0',
     textAlign: 'center',
-    marginBottom: 4,
+    fontWeight: '500',
   },
   bottomButtonContainer: {
     flexDirection: 'row',
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingBottom: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#ffffff',
     borderTopWidth: 1,
     borderTopColor: '#e0e0e0',
     gap: 12,
@@ -450,28 +537,30 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 6,
+    elevation: 4,
   },
   setFenceButton: {
-    backgroundColor: '#4285F4',
+    backgroundColor: '#1e88e5',
+    shadowColor: '#1e88e5',
   },
   currentLocationButton: {
-    backgroundColor: '#34A853',
+    backgroundColor: '#43a047',
+    shadowColor: '#43a047',
   },
   activeBottomButton: {
-    backgroundColor: '#1976D2',
+    backgroundColor: '#1565c0',
   },
   bottomButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#fff',
+    color: '#ffffff',
     textAlign: 'center',
   },
   activeBottomButtonText: {
-    color: '#fff',
+    color: '#ffffff',
     fontWeight: '700',
   },
 });

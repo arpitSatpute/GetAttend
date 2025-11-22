@@ -1,29 +1,54 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Light Mode Theme for GeoAttend
+ * Professional, clean design with accessibility focus
  */
 
 import { Platform } from 'react-native';
 
-const tintColorLight = '#0a7ea4';
-const tintColorDark = '#fff';
+// Primary brand colors (light mode only)
+const tintColorLight = '#1e88e5'; // Professional blue
+const accentColor = '#43a047'; // Success green
+const errorColor = '#e53935'; // Error red
+const warningColor = '#fb8c00'; // Warning orange
 
 export const Colors = {
   light: {
-    text: '#11181C',
-    background: '#fff',
+    // Text colors
+    text: '#1a1a1a',
+    textSecondary: '#666666',
+    textTertiary: '#999999',
+    
+    // Background colors
+    background: '#ffffff',
+    surfaceLight: '#f5f7fa',
+    surfaceDark: '#ecf0f5',
+    
+    // Brand colors
     tint: tintColorLight,
-    icon: '#687076',
-    tabIconDefault: '#687076',
+    icon: '#424242',
+    
+    // Tab colors
+    tabIconDefault: '#999999',
     tabIconSelected: tintColorLight,
+    
+    // Status colors
+    success: accentColor,
+    error: errorColor,
+    warning: warningColor,
+    info: tintColorLight,
+    
+    // Border colors
+    border: '#e0e0e0',
+    borderLight: '#f0f0f0',
   },
   dark: {
-    text: '#ECEDEE',
-    background: '#151718',
-    tint: tintColorDark,
-    icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
+    // Disabled for light mode only
+    text: '#ffffff',
+    background: '#ffffff',
+    tint: tintColorLight,
+    icon: '#ffffff',
+    tabIconDefault: '#ffffff',
+    tabIconSelected: tintColorLight,
   },
 };
 
