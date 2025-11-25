@@ -13,26 +13,26 @@ import java.util.Arrays;
 @Slf4j
 public class LoggingAspect {
 
-    @Before("execution(* com.teamarc.demo.services.*.*(..))")
+    @Before("execution(* com.group12.geoAttend.services.*.*(..))")
     public void logBefore(JoinPoint joinPoint) {
         String methodName = joinPoint.getSignature().getName();
         Object[] args = joinPoint.getArgs();
         log.info("Entering method: {}() with arguments: {}", methodName, Arrays.toString(args));
     }
 
-    @AfterReturning(pointcut = "execution(* com.teamarc.demo.services.*.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* com.group12.geoAttend.services.*.*(..))", returning = "result")
     public void logAfterReturning(JoinPoint joinPoint, Object result) {
         String methodName = joinPoint.getSignature().getName();
         log.info("Exiting method: {}() with result: {}", methodName, result != null ? result : "void");
     }
 
-    @AfterThrowing(pointcut = "execution(* com.teamarc.demo.services.*.*(..))", throwing = "error")
+    @AfterThrowing(pointcut = "execution(* com.group12.geoAttend.services.*.*(..))", throwing = "error")
     public void logAfterThrowing(JoinPoint joinPoint, Throwable error) {
         String methodName = joinPoint.getSignature().getName();
         log.error("Exception in method: {}() with error: {}", methodName, error.getMessage());
     }
 
-    @Around("execution(* com.teamarc.demo.services.*.*(..))")
+    @Around("execution(* com.group12.geoAttend.services.*.*(..))")
     public Object logExecutionTime(ProceedingJoinPoint joinPoint) throws Throwable {
         long start = System.currentTimeMillis();
         Object proceed = joinPoint.proceed();

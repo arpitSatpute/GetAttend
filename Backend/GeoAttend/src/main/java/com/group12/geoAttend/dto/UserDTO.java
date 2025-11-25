@@ -11,7 +11,7 @@ import java.util.Set;
 @Data
 public class UserDTO {
 
-    private Long id;
+    private String id;
 
     @NotEmpty(message = "Name cannot be empty")
     private String name;

@@ -1,9 +1,10 @@
 package com.group12.geoAttend.entity;
 
 import com.group12.geoAttend.entity.enums.Role;
-import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,22 +15,19 @@ import java.util.stream.Collectors;
 
 @Getter
 @Setter
-@Entity
-@Table(name = "app_user")
+@Document(collection = "app_user")
 public class User implements UserDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private String id;
 
     private String name;
 
-    @Column(unique = true)
+    // unique index can be created in MongoDB; keep field as-is
     private String email;
 
     private String password;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Enumerated(EnumType.STRING)
+    // Roles will be stored as an array of enum names
     private Set<Role> roles;
 
 

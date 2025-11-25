@@ -23,7 +23,7 @@ public class UserService implements UserDetailsService {
         return userRepository.findByEmail(username).orElse(null);
     }
 
-    public User getUserById(Long userId) {
+    public User getUserById(String userId) {
         return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 
