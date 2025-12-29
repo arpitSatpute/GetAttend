@@ -210,6 +210,7 @@ const styles = StyleSheet.create({
   name: { fontSize: 18, fontWeight: 'bold' },
   email: { fontSize: 14, color: '#666' },
   status: { fontSize: 14, color: '#4285F4', marginTop: 4 },
+  detail: { fontSize: 14, color: '#333', marginTop: 2 },
   detailContainer: { flex: 1, padding: 24, backgroundColor: '#fff' },
   backBtn: { marginBottom: 16 },
   label: { fontSize: 16, marginTop: 10 },
