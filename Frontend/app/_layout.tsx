@@ -4,7 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 
 import { AttendanceProvider } from '@/contexts/AttendanceContext';
-import { AuthProvider } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { GeofenceProvider } from '@/contexts/GeofenceContext';
 import { NotificationProvider } from '@/contexts/NotificationContext';
 
@@ -12,8 +12,19 @@ export const unstable_settings = {
   initialRouteName: 'index',
 };
 
-export default function RootLayout() {
+function RoleBasedTabs() {
+  const { user } = useAuth();
+  if (!user) return null;
+  if (user.role === 'employer') {
+    return <Stack.Screen name="(employer)" options={{ headerShown: false }} />;
+  }
+  if (user.role === 'employee') {
+    return <Stack.Screen name="(employee)" options={{ headerShown: false }} />;
+  }
+  return null;
+}
 
+export default function RootLayout() {
   return (
     <AuthProvider>
       <GeofenceProvider>
@@ -24,7 +35,8 @@ export default function RootLayout() {
                 <Stack.Screen name="index" options={{ headerShown: false }} />
                 <Stack.Screen name="welcome" options={{ headerShown: false }} />
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                {/* Role-based tab layout */}
+                <RoleBasedTabs />
                 <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
               </Stack>
               <StatusBar style="dark" />

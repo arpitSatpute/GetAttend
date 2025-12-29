@@ -28,6 +28,7 @@ export default function SignupScreen() {
     email: '',
     password: '',
     confirmPassword: '',
+    role: null as 'employer' | 'employee' | null,
   });
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -57,36 +58,35 @@ export default function SignupScreen() {
   };
 
   const validateForm = () => {
-    const { firstName, lastName, email, password, confirmPassword } = formData;
-    
+    const { firstName, lastName, email, password, confirmPassword, role } = formData;
+    if (!role) {
+      Alert.alert('Error', 'Please select Employer or Employee');
+      return false;
+    }
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in all fields');
       return false;
     }
-    
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match');
       return false;
     }
-    
     if (password.length < 8) {
       Alert.alert('Error', 'Password must be at least 8 characters long');
       return false;
     }
-    
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       Alert.alert('Error', 'Please enter a valid email address');
       return false;
     }
-    
     return true;
   };
 
   const handleSignup = async () => {
     if (!validateForm()) return;
-
-    const success = await signup(formData);
+    const { confirmPassword, ...signupData } = formData;
+    const success = await signup(signupData as any);
     if (success) {
       Alert.alert('Success', 'Account created successfully!', [
         { text: 'OK', onPress: () => router.replace('/login' as any) }
@@ -108,6 +108,35 @@ export default function SignupScreen() {
           <View style={styles.backgroundCircle2} />
           
           <Animated.View style={[styles.content, { opacity: fadeAnim, transform: [{ translateY: slideAnim }] }]}>
+            {/* Role Selection */}
+            <View style={{ marginBottom: 24, alignItems: 'center' }}>
+              <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>Sign up as:</Text>
+              <View style={{ flexDirection: 'row', gap: 16 }}>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: formData.role === 'employer' ? '#4285F4' : '#e0e0e0',
+                    paddingVertical: 8,
+                    paddingHorizontal: 20,
+                    borderRadius: 20,
+                    marginRight: 8,
+                  }}
+                  onPress={() => setFormData(prev => ({ ...prev, role: 'employer' }))}
+                >
+                  <Text style={{ color: formData.role === 'employer' ? 'white' : '#333', fontWeight: 'bold' }}>Employer</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: formData.role === 'employee' ? '#4285F4' : '#e0e0e0',
+                    paddingVertical: 8,
+                    paddingHorizontal: 20,
+                    borderRadius: 20,
+                  }}
+                  onPress={() => setFormData(prev => ({ ...prev, role: 'employee' }))}
+                >
+                  <Text style={{ color: formData.role === 'employee' ? 'white' : '#333', fontWeight: 'bold' }}>Employee</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
             {/* Header */}
             <View style={styles.header}>
               <View style={styles.logoContainer}>

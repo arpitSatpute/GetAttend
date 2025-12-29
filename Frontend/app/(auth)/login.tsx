@@ -24,6 +24,7 @@ const { width, height } = Dimensions.get('window');
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'employer' | 'employee' | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [emailFocused, setEmailFocused] = useState(false);
   const [passwordFocused, setPasswordFocused] = useState(false);
@@ -48,12 +49,16 @@ export default function LoginScreen() {
   }, []);
 
   const handleLogin = async () => {
+    if (!role) {
+      Alert.alert('Error', 'Please select Employer or Employee');
+      return;
+    }
     if (!email || !password) {
       Alert.alert('Error', 'Please fill in all fields');
       return;
     }
 
-    const success = await login(email, password);
+    const success = await login(email, password, role);
     if (success) {
       router.replace('/(tabs)');
     } else {
@@ -83,6 +88,36 @@ export default function LoginScreen() {
               <Text style={styles.title}>GeoAttend</Text>
               <Text style={styles.subtitle}>Welcome back! Please sign in to continue.</Text>
             </View>
+
+          {/* Role Selection */}
+          <View style={{ marginBottom: 24, alignItems: 'center' }}>
+            <Text style={{ fontWeight: 'bold', fontSize: 16, marginBottom: 8 }}>Login as:</Text>
+            <View style={{ flexDirection: 'row', gap: 16 }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: role === 'employer' ? '#4285F4' : '#e0e0e0',
+                  paddingVertical: 8,
+                  paddingHorizontal: 20,
+                  borderRadius: 20,
+                  marginRight: 8,
+                }}
+                onPress={() => setRole('employer')}
+              >
+                <Text style={{ color: role === 'employer' ? 'white' : '#333', fontWeight: 'bold' }}>Employer</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: role === 'employee' ? '#4285F4' : '#e0e0e0',
+                  paddingVertical: 8,
+                  paddingHorizontal: 20,
+                  borderRadius: 20,
+                }}
+                onPress={() => setRole('employee')}
+              >
+                <Text style={{ color: role === 'employee' ? 'white' : '#333', fontWeight: 'bold' }}>Employee</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
 
           {/* Login Form */}
           <View style={styles.formContainer}>
